@@ -33,8 +33,8 @@ namespace MyOrganization.DataAccessObject
                         {
                             while (reader.Read())
                             {
-                                users.UserId = Convert.ToInt32(reader["UserId"]);
-                                users.UserName = reader["UserName"].ToString();
+                                users.UserId = Convert.ToInt32(reader["EmployeeId"]);
+                                users.UserName = reader["FirstName"].ToString();
                                 users.IsActive = Convert.ToBoolean(reader["IsActive"].ToString());
                                 users.Email = reader["Email"].ToString();
                             }
@@ -73,6 +73,7 @@ namespace MyOrganization.DataAccessObject
                                 employee.LastName = reader["LastName"].ToString();
                                 employee.Email = reader["Email"].ToString();
                                 employee.PhoneNumber = Convert.ToInt32(reader["PhoneNumber"]);
+                                employee.IsActive = Convert.ToBoolean(reader["IsActive"]);                                
                                 lstEmployee.Add(employee);
                             }
                         }
@@ -88,7 +89,6 @@ namespace MyOrganization.DataAccessObject
                 throw;
             }
         }
-
         public async Task<List<EmployeeDetails>> DeleteEmployeeDetailsById(int EmployeeId)
         {
             try
@@ -119,7 +119,7 @@ namespace MyOrganization.DataAccessObject
             }
             return null;
         }
-        public async Task<List<EmployeeDetails>> UpdateEmployeeDataById(int EmployeeId, string FirstName, string LastName, string SurName, string Email)
+        public async Task<List<EmployeeDetails>> UpdateEmployeeDataById(EmployeeDetails employeeDetails)
         {
             try
             {
@@ -131,18 +131,19 @@ namespace MyOrganization.DataAccessObject
                     using (SqlCommand command = new SqlCommand(SqlContstants.ORG_UPDATE_EmployeeDetails_BYID, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@empId", EmployeeId);
-                        command.Parameters.AddWithValue("@FirstName", FirstName);
-                        command.Parameters.AddWithValue("@LastName", LastName);
-                        command.Parameters.AddWithValue("@SurName", SurName);
-                        command.Parameters.AddWithValue("@Email", Email);
+                        command.Parameters.AddWithValue("@empId", employeeDetails.EmployeeId);
+                        command.Parameters.AddWithValue("@FirstName", employeeDetails.FirstName);
+                        command.Parameters.AddWithValue("@LastName", employeeDetails.LastName);
+                        command.Parameters.AddWithValue("@SurName", employeeDetails.SurName);
+                        command.Parameters.AddWithValue("@Email", employeeDetails.Email);
                         result = command.ExecuteNonQuery();
                     }
                     if (result > 0)
                     {
                         return lstEmployee = await this.GetAllEmployeeDetails();
                     }
-
+                    if (connection.State != ConnectionState.Closed)
+                        connection.Close();
                 }
 
             }
@@ -150,23 +151,122 @@ namespace MyOrganization.DataAccessObject
             {
                 throw;
             }
-            finally
-            {
 
-            }
             return null;
         }
-
-        public async Task<List<EmployeeDetails>> SaveEmployeeData()
+        public async Task<List<EmployeeDetails>> SaveEmployeeData(EmployeeDetails employeeDetails)
         {
             try
             {
-                return await this.GetAllEmployeeDetails();
+
+                List<EmployeeDetails> lstEmployee = new List<EmployeeDetails>();
+                int result;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_SAVE_EmployeeDetails, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@firstName", employeeDetails.FirstName);
+                        command.Parameters.AddWithValue("@lastName", employeeDetails.LastName);
+                        command.Parameters.AddWithValue("@surName", employeeDetails.SurName);
+                        command.Parameters.AddWithValue("@phoneNumber", employeeDetails.PhoneNumber);
+                        command.Parameters.AddWithValue("@email", employeeDetails.Email);
+                        command.Parameters.AddWithValue("@password", employeeDetails.Password);
+                        command.Parameters.AddWithValue("@dob", employeeDetails.DOB);
+                        command.Parameters.AddWithValue("@doj", employeeDetails.DOJ);
+                        result = command.ExecuteNonQuery();
+                    }
+                    if (result > 0)
+                    {
+                        return lstEmployee = await this.GetAllEmployeeDetails();
+                    }
+                    if (connection.State != ConnectionState.Closed)
+                        connection.Close();
+                }
             }
             catch (Exception)
             {
                 throw;
             }
+            return null;
         }
+
+        public async Task<List<ProductDetails>> GetAllProductDetails()
+        {
+            try
+            {
+                List<ProductDetails> prodDetails = new List<ProductDetails>();
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_GET_ALL_ProductDetails, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                ProductDetails employee = new ProductDetails();
+                                employee.ProductId = Convert.ToInt32(reader["ProductId"]);
+                                employee.ProductName = reader["ProductType"].ToString();
+                                employee.ProductType = reader["ProductName"].ToString();
+                                employee.PricePerItem = Convert.ToDouble(reader["PricePerItem"]);
+                                employee.InOffer = Convert.ToBoolean(reader["InOffer"]);
+                                employee.OfferPercentage = Convert.ToDouble(reader["OfferPercentage"]);
+                                employee.ProductItems = Convert.ToDouble(reader["ProductItems"]);
+                                employee.DateCreated = Convert.ToDateTime(reader["DateCreated"]);
+                                employee.CreatedBy = Convert.ToString(reader["CreatedBy"]);                 
+                                employee.IsExists = Convert.ToBoolean(reader["IsExists"]);
+                                prodDetails.Add(employee);
+                            }
+                        }
+                        if (connection.State != ConnectionState.Closed)
+                            connection.Close();
+                    }
+                    return prodDetails;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<List<ProductDetails>> SaveProductDetails(ProductDetails productDetails)
+        {
+            try
+            {
+                List<ProductDetails> lstEmployee = new List<ProductDetails>();
+                int result;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_SAVE_ProductDetails, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@productType", productDetails.ProductType);
+                        command.Parameters.AddWithValue("@productName", productDetails.ProductName);
+                        command.Parameters.AddWithValue("@pricePerItem", productDetails.PricePerItem);
+                        command.Parameters.AddWithValue("@inOffer", productDetails.InOffer);
+                        command.Parameters.AddWithValue("@offerPercentage", productDetails.OfferPercentage);
+                        command.Parameters.AddWithValue("@productItems", productDetails.ProductItems);
+                        result = command.ExecuteNonQuery();
+                    }
+                    if (result > 0)
+                    {
+                        return lstEmployee = await this.GetAllProductDetails();
+                    }
+                    if (connection.State != ConnectionState.Closed)
+                        connection.Close();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return null;
+        }
+
     }
 }

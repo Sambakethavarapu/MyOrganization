@@ -11,8 +11,7 @@ namespace MyOrganization.BusinessObject
             try
             {
                 Users lstuser = new Users();
-                lstuser = await dao.LoginUser(userName, password);
-                return lstuser;
+                return lstuser = await dao.LoginUser(userName, password);
 
             }
             catch (Exception)
@@ -25,7 +24,7 @@ namespace MyOrganization.BusinessObject
         {
             try
             {
-                List< EmployeeDetails> lstEmployee = new List< EmployeeDetails>();
+                List<EmployeeDetails> lstEmployee = new List<EmployeeDetails>();
                 lstEmployee = await dao.GetAllEmployeeDetails();
                 return lstEmployee;
             }
@@ -35,13 +34,12 @@ namespace MyOrganization.BusinessObject
                 throw;
             }
         }
-
         public async Task<List<EmployeeDetails>> SaveEmployeeData(EmployeeDetails employeeDetails)
         {
             try
             {
                 List<EmployeeDetails> lstEmployee = new List<EmployeeDetails>();
-                lstEmployee = await dao.DeleteEmployeeDetailsById(employeeDetails.EmployeeId);
+                lstEmployee = await dao.SaveEmployeeData(employeeDetails);
                 return lstEmployee;
             }
             catch (Exception)
@@ -55,8 +53,8 @@ namespace MyOrganization.BusinessObject
             try
             {
                 List<EmployeeDetails> lstEmployee = new List<EmployeeDetails>();
-                lstEmployee = await dao.DeleteEmployeeDetailsById(EmployeeId);
-                return lstEmployee;
+                return lstEmployee = await dao.DeleteEmployeeDetailsById(EmployeeId);
+
             }
             catch (Exception)
             {
@@ -64,13 +62,13 @@ namespace MyOrganization.BusinessObject
                 throw;
             }
         }
-        public async Task<List<EmployeeDetails>> UpdateEmployeeDataById(int EmployeeId,string FirstName,string LastName,string SurName,string Email)
+        public async Task<List<EmployeeDetails>> UpdateEmployeeDataById(EmployeeDetails employeeDetails)
         {
             try
             {
                 List<EmployeeDetails> lstEmployee = new List<EmployeeDetails>();
-                lstEmployee = await dao.UpdateEmployeeDataById(EmployeeId, FirstName, LastName, SurName, Email);
-                return lstEmployee;
+                return lstEmployee = await dao.UpdateEmployeeDataById(employeeDetails);
+
             }
             catch (Exception)
             {
@@ -78,6 +76,6 @@ namespace MyOrganization.BusinessObject
                 throw;
             }
         }
-        
+
     }
 }

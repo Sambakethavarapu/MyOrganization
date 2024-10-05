@@ -6,7 +6,7 @@ using MyOrganization.DataModel;
 
 namespace MyOrganization.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeeController : ControllerBase
@@ -33,22 +33,17 @@ namespace MyOrganization.Controllers
             }
             return null;
         }
+
+        [Route("SaveEmployeeDetails")]
         [HttpPost]
         public async Task<List<EmployeeDetails>> SaveEmployeeData([FromBody] EmployeeDetails employeeDetails)
         {
             try
             {
-                EmployeeDetails employeeDetails1 = new EmployeeDetails();
-                employeeDetails1.FirstName = employeeDetails.FirstName;
-                employeeDetails1.FirstName = employeeDetails.LastName;
-                employeeDetails1.SurName = employeeDetails.SurName;
-                employeeDetails1.PhoneNumber = employeeDetails.PhoneNumber;
-                employeeDetails1.Email = employeeDetails.Email;
-                employeeDetails1.DOB = employeeDetails.DOB;
-                employeeDetails1.DOJ = employeeDetails.DOJ;
+                
                 List<EmployeeDetails> empDetails = new List<EmployeeDetails>();
                 UserDetails userDetails = new UserDetails();
-                empDetails = await userDetails.SaveEmployeeData(employeeDetails1);
+                empDetails = await userDetails.SaveEmployeeData(employeeDetails);
                 return empDetails;
             }
             catch (Exception)
@@ -56,7 +51,7 @@ namespace MyOrganization.Controllers
 
                 throw;
             }
-            //return Ok(employeeDetails);
+            //return Ok(empDetails);
         }
 
         [Route("UpdateEmployeeDataById")]
@@ -65,14 +60,9 @@ namespace MyOrganization.Controllers
         {
             try
             {
-                int Employeeid = employeeDetails.EmployeeId;
-                string FirstName = employeeDetails.FirstName;
-                string LastName = employeeDetails.LastName;
-                string Email = employeeDetails.Email;
-                string SurName = employeeDetails.SurName;
                 List<EmployeeDetails> empDetails = new List<EmployeeDetails>();
                 UserDetails userDetails = new UserDetails();
-                empDetails = await userDetails.UpdateEmployeeDataById(Employeeid, FirstName, LastName, SurName, Email);
+                empDetails = await userDetails.UpdateEmployeeDataById(employeeDetails);
                 return empDetails;
             }
             catch (Exception)
