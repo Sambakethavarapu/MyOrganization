@@ -77,5 +77,17 @@ namespace MyOrganization.BusinessObject
             }
         }
 
+        public async Task<bool> RegisterComplaints(ComplaintDetails complaintDetails)
+        {
+            try
+            {
+                return await dao.RegisterComplaints(complaintDetails);
+
+            }
+            catch { }
+            return false;
+
+        }
+
     }
 }

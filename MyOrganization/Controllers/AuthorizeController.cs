@@ -25,10 +25,10 @@ namespace MyOrganization.Controllers
         //}
 
         [HttpPost("GenerateToken")]
-        public async Task<IActionResult> GenerateToken(string UserName, string Password)
+        public async Task<IActionResult> GenerateToken(string userName, string password)
         {
             UserDetails userDetails = new UserDetails();
-            var user = await userDetails.LoginUser(UserName, Password);
+            var user = await userDetails.LoginUser(userName, password);
             //var user = await this.context.TblUsers.FirstOrDefaultAsync(item => item.Username == userCred.username && item.Password == userCred.password);
             if (user != null)
             {
@@ -60,6 +60,7 @@ namespace MyOrganization.Controllers
             }
 
         }
+
         [Route("ValidateToken")]
         [HttpGet]
         public static string ValidateToken(string token)

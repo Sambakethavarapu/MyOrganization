@@ -268,5 +268,30 @@ namespace MyOrganization.DataAccessObject
             return null;
         }
 
+        public async Task<bool> RegisterComplaints(ComplaintDetails complaintDetails)
+        {
+            try {
+                int result;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_SAVE_EmployeeDetails, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@complaintUserName", complaintDetails.ComplaintUserName);
+                        command.Parameters.AddWithValue("@mobileNumber", complaintDetails.MobileNumber);
+                        command.Parameters.AddWithValue("@complaintDescription", complaintDetails.ComplaintDescription);
+                        result = command.ExecuteNonQuery();
+                        return result >0 ? true :false;
+                    }
+                    
+                    if (connection.State != ConnectionState.Closed)
+                        connection.Close();
+                }
+            }
+            catch (Exception) { }
+            return false;
+        }
+
     }
 }

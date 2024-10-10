@@ -19,6 +19,8 @@ namespace MyOrganization.Controllers
             {
                 List<EmployeeDetails> employeeDetails = new List<EmployeeDetails>();
                 UserDetails userDetails = new UserDetails();
+                var re = Request;
+                var rr = re.Headers;
                 employeeDetails = await userDetails.GetAllEmployeeDetails();
                 if (userDetails != null) { return employeeDetails; }
                 else
@@ -34,13 +36,13 @@ namespace MyOrganization.Controllers
             return null;
         }
 
-        [Route("SaveEmployeeDetails")]
         [HttpPost]
+        [Route("SaveEmployeeDetails")]
         public async Task<List<EmployeeDetails>> SaveEmployeeData([FromBody] EmployeeDetails employeeDetails)
         {
             try
             {
-                
+
                 List<EmployeeDetails> empDetails = new List<EmployeeDetails>();
                 UserDetails userDetails = new UserDetails();
                 empDetails = await userDetails.SaveEmployeeData(employeeDetails);
@@ -54,8 +56,8 @@ namespace MyOrganization.Controllers
             //return Ok(empDetails);
         }
 
-        [Route("UpdateEmployeeDataById")]
         [HttpPost]
+        [Route("UpdateEmployeeDataById")]
         public async Task<List<EmployeeDetails>> UpdateEmployeeDataById([FromBody] EmployeeDetails employeeDetails)
         {
             try
@@ -73,8 +75,8 @@ namespace MyOrganization.Controllers
 
         }
 
+        [HttpPut]
         [Route("DeleteEmployeeDetailsById")]
-        [HttpPost]
         public async Task<List<EmployeeDetails>> DeleteEmployeeDetailsById(int employeeId)
         {
             try
