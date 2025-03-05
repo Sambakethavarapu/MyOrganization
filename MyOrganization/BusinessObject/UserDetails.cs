@@ -76,7 +76,6 @@ namespace MyOrganization.BusinessObject
                 throw;
             }
         }
-
         public async Task<bool> RegisterComplaints(ComplaintDetails complaintDetails)
         {
             try
@@ -88,6 +87,18 @@ namespace MyOrganization.BusinessObject
             return false;
 
         }
+        public async Task<bool> RegisterUserDetails(Users userDetails)
+        {
+            try
+            {
+                return await dao.RegisterUserDetails(userDetails);
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

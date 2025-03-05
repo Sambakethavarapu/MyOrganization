@@ -16,41 +16,87 @@ namespace MyOrganization.DataAccessObject
             var configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
             connectionString = configuration.GetSection("ConnectionStrings:apiconnectionstring").Value;
         }
+        //public async Task<Users> LoginUser(string userName, string password)
+        //{
+        //    try
+        //    {
+        //        Users users = new Users();
+        //        using (SqlConnection connection = new SqlConnection(connectionString))
+        //        {
+        //            connection.Open();
+        //            using (SqlCommand command = new SqlCommand(SqlContstants.ORG_User_Login, connection))
+        //            {
+        //                command.CommandType = CommandType.StoredProcedure;
+        //                command.Parameters.AddWithValue("@username", userName);
+        //                command.Parameters.AddWithValue("@password", password);
+        //                using (SqlDataReader reader = command.ExecuteReader())
+        //                {
+        //                    while (reader.Read())
+        //                    {
+        //                        users.UserId = Convert.ToInt32(reader["Role_Id"]);
+        //                        users.UserName = reader["User_FirstName"].ToString();
+        //                        users.IsActive = Convert.ToBoolean(reader["User_IsActive"].ToString());
+        //                        users.Email = reader["User_Email"].ToString();
+        //                    }
+        //                }
+        //                if (connection.State != ConnectionState.Closed)
+        //                    connection.Close();
+        //            }
+        //            return users.UserId > 0 ? users : null;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw new UnauthorizedAccessException();
+        //    }
+        //    return null;
+        //}
+
         public async Task<Users> LoginUser(string userName, string password)
         {
+            Users user = null;
+
             try
             {
-                Users users = new Users();
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    connection.Open();
-                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_User_Login, connection))
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(SqlContstants.ORG_User_Login, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@username", userName);
                         command.Parameters.AddWithValue("@password", password);
-                        using (SqlDataReader reader = command.ExecuteReader())
+
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
-                            while (reader.Read())
+                            if (await reader.ReadAsync())
                             {
-                                users.UserId = Convert.ToInt32(reader["EmployeeId"]);
-                                users.UserName = reader["FirstName"].ToString();
-                                users.IsActive = Convert.ToBoolean(reader["IsActive"].ToString());
-                                users.Email = reader["Email"].ToString();
+                                user = new Users
+                                {
+                                    UserId = Convert.ToInt32(reader["User_Id"]),
+                                    UserName = reader["User_FirstName"].ToString(),
+                                    IsActive = reader.GetBoolean(reader.GetOrdinal("User_IsActive")),
+                                    Email = reader.GetString(reader.GetOrdinal("User_Email")),
+                                    RoleId = reader.GetInt32(reader.GetOrdinal("Role_Id"))
+                                };
                             }
                         }
-                        if (connection.State != ConnectionState.Closed)
-                            connection.Close();
                     }
-                    return users.UserId > 0 ? users : null;
                 }
+
+                return user;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                // Log the exception (optional)
+                //_logger.LogError(ex, "An error occurred during login.");
+
+                // Throw a custom exception for invalid credentials
+                throw new UnauthorizedAccessException("Invalid username or password.", ex);
             }
-            return null;
         }
+
 
         public async Task<List<EmployeeDetails>> GetAllEmployeeDetails()
         {
@@ -268,29 +314,126 @@ namespace MyOrganization.DataAccessObject
             return null;
         }
 
+        //public async Task<bool> RegisterComplaints(ComplaintDetails complaintDetails)
+        //{
+        //    try {
+        //        int result;
+        //        using (SqlConnection connection = new SqlConnection(connectionString))
+        //        {
+        //            connection.Open();
+        //            using (SqlCommand command = new SqlCommand(SqlContstants.ORG_SAVE_EmployeeDetails, connection))
+        //            {
+        //                command.CommandType = CommandType.StoredProcedure;
+        //                command.Parameters.AddWithValue("@complaintUserName", complaintDetails.ComplaintUserName);
+        //                command.Parameters.AddWithValue("@mobileNumber", complaintDetails.MobileNumber);
+        //                command.Parameters.AddWithValue("@complaintDescription", complaintDetails.ComplaintDescription);
+        //                result = command.ExecuteNonQuery();
+        //                return result >0 ? true :false;
+        //            }
+                    
+        //            if (connection.State != ConnectionState.Closed)
+        //                connection.Close();
+        //        }
+        //    }
+        //    catch (Exception) { }
+        //    return false;
+        //}
+
         public async Task<bool> RegisterComplaints(ComplaintDetails complaintDetails)
         {
-            try {
-                int result;
-                using (SqlConnection connection = new SqlConnection(connectionString))
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    connection.Open();
-                    using (SqlCommand command = new SqlCommand(SqlContstants.ORG_SAVE_EmployeeDetails, connection))
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(SqlContstants.ORG_SAVE_EmployeeDetails, connection))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         command.Parameters.AddWithValue("@complaintUserName", complaintDetails.ComplaintUserName);
                         command.Parameters.AddWithValue("@mobileNumber", complaintDetails.MobileNumber);
                         command.Parameters.AddWithValue("@complaintDescription", complaintDetails.ComplaintDescription);
-                        result = command.ExecuteNonQuery();
-                        return result >0 ? true :false;
+
+                        int result = await command.ExecuteNonQueryAsync();
+                        return result > 0;
                     }
-                    
-                    if (connection.State != ConnectionState.Closed)
-                        connection.Close();
                 }
             }
-            catch (Exception) { }
-            return false;
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                // _logger.LogError(ex, "An error occurred while registering complaints.");
+
+                // Re-throw the exception or handle it as needed
+                throw new ApplicationException("An error occurred while registering complaints.", ex);
+            }
+        }
+        public async Task<bool> RegisterUserDetails(Users  userDetails) {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(SqlContstants.ORG_Save_UserDetail, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@FirstName", userDetails.FirstName);                        
+                        command.Parameters.AddWithValue("@LastName", userDetails.LastName);
+                        command.Parameters.AddWithValue("@SurName", userDetails.SurName);
+                        command.Parameters.AddWithValue("@Role_Id", userDetails.RoleId);
+                        command.Parameters.AddWithValue("@Email",userDetails.Email);
+                        command.Parameters.AddWithValue("@PhoneNumber", userDetails.PhoneNumber);
+                        command.Parameters.AddWithValue("@Password", userDetails.Password);
+                        command.Parameters.AddWithValue("@IsActive", userDetails.IsActive);
+                        command.Parameters.AddWithValue("@DateOfBirth", userDetails.DateOfBirth);
+                        int result = await command.ExecuteNonQueryAsync();
+                        return result > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                // _logger.LogError(ex, "An error occurred while registering complaints.");
+
+                // Re-throw the exception or handle it as needed
+                throw new ApplicationException("An error occurred while registering complaints.", ex);
+            }
+        }
+
+        public async Task<List<EmployeeDetails>> DeleteUserDetailsById(int userId)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (var command = new SqlCommand(SqlContstants.ORG_Delete_UserDetail, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@UserId", userId);
+
+                        int result = await command.ExecuteNonQueryAsync();
+
+                        if (result > 0)
+                        {
+                            return await GetAllEmployeeDetails();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (optional)
+                // _logger.LogError(ex, "An error occurred while deleting employee details.");
+
+                // Re-throw the exception or handle it as needed
+                throw new ApplicationException("An error occurred while deleting employee details.", ex);
+            }
+
+            return null;
         }
 
     }

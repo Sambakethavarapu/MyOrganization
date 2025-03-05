@@ -1,6 +1,21 @@
-@MyOrganization_HostAddress = http://localhost:5145
+@MyOrganization_HostAddress = https://localhost:7271
 
 GET {{MyOrganization_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+@userName=string
+@password=string
+POST {{MyOrganization_HostAddress}}/api/authorize/ValidateUserandGenerateToken?userName={{userName}}&password={{password}}
+
+###
+
+POST {{MyOrganization_HostAddress}}/api/registration/RegisterUser
+Content-Type: application/json
+
+{
+  //Users
+}
 
 ###

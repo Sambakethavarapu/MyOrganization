@@ -6,7 +6,7 @@ using MyOrganization.DataModel;
 
 namespace MyOrganization.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LoginController : ControllerBase

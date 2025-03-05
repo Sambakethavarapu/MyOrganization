@@ -24,12 +24,11 @@ namespace MyOrganization.Controllers
         //    this.jwtSettings = options.Value;
         //}
 
-        [HttpPost("GenerateToken")]
+        [HttpPost("ValidateUserandGenerateToken")]
         public async Task<IActionResult> GenerateToken(string userName, string password)
         {
             UserDetails userDetails = new UserDetails();
             var user = await userDetails.LoginUser(userName, password);
-            //var user = await this.context.TblUsers.FirstOrDefaultAsync(item => item.Username == userCred.username && item.Password == userCred.password);
             if (user != null)
             {
                 var configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
